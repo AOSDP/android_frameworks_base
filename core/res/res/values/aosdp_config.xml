@@ -18,6 +18,14 @@
     <integer name="config_proximityCheckTimeout">250</integer>
     <bool name="config_proximityCheckOnWakeEnabledByDefault">false</bool>
 
+    <!-- Power menu -->
+    <string-array translatable="false" name="config_custom_globalActionsList">
+        <item>power</item>
+        <item>restart</item>
+        <item>advanced</item>
+        <item>screenshot</item>
+    </string-array>
+
     <!-- Stop listening to the fingerprint reader when NON-WAKEUP proximity sensor is covered & screen is off.
          config_proximityCheckOnWake must be true. -->
     <bool name="config_proximityCheckOnFingerprintWake">false</bool>
