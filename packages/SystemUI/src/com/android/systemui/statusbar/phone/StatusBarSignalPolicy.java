@@ -443,6 +443,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
                     typeId == that.typeId &&
                     roaming == that.roaming &&
                     needsLeadingPadding == that.needsLeadingPadding &&
+                    provisioned == that.provisioned &&
                     Objects.equals(typeContentDescription, that.typeContentDescription) &&
                     volteId == that.volteId;
         }
@@ -468,6 +469,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
             other.typeId = typeId;
             other.roaming = roaming;
             other.needsLeadingPadding = needsLeadingPadding;
+            other.provisioned = provisioned;
             other.typeContentDescription = typeContentDescription;
             other.volteId = volteId;
         }
