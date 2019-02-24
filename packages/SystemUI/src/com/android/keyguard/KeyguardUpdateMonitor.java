@@ -152,7 +152,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int MSG_FINGERPRINT_AUTHENTICATION_CONTINUE = 336;
     private static final int MSG_DEVICE_POLICY_MANAGER_STATE_CHANGED = 337;
     private static final int MSG_TELEPHONY_CAPABLE = 338;
-    private static final int MSG_PROXIMITY_CHANGE = 338;
+    private static final int MSG_PROXIMITY_CHANGE = 339;
 
     /** Fingerprint state: Not listening to fingerprint. */
     private static final int FINGERPRINT_STATE_STOPPED = 0;
