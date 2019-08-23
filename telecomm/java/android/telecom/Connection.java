@@ -45,6 +45,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.nio.channels.Channels;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -329,25 +330,11 @@ public abstract class Connection extends Conferenceable {
      */
     public static final int CAPABILITY_CAN_PULL_CALL = 0x01000000;
 
-    /**
-     * Add participant in an active or conference call option
-     *
-     * @hide
-     */
-    public static final int CAPABILITY_ADD_PARTICIPANT = 0x04000000;
-
     /** Call supports the deflect feature. */
     public static final int CAPABILITY_SUPPORT_DEFLECT = 0x02000000;
 
-    /**
-     * Remote device supports RTT.
-     * @hide
-     */
-
-    public static final int CAPABILITY_SUPPORTS_RTT_REMOTE = 0x08000000;
-
     //**********************************************************************************************
-    // Next CAPABILITY value: 0x10000000
+    // Next CAPABILITY value: 0x04000000
     //**********************************************************************************************
 
     /**
@@ -772,9 +759,7 @@ public abstract class Connection extends Conferenceable {
         if (can(capabilities, CAPABILITY_SUPPORT_DEFLECT)) {
             builder.append(isLong ? " CAPABILITY_SUPPORT_DEFLECT" : " sup_def");
         }
-        if (can(capabilities, CAPABILITY_SUPPORTS_RTT_REMOTE)) {
-            builder.append(isLong ? " CAPABILITY_SUPPORTS_RTT_REMOTE" : " sup_rtt");
-        }
+
         builder.append("]");
         return builder.toString();
     }
@@ -882,7 +867,6 @@ public abstract class Connection extends Conferenceable {
         public void onRemoteRttRequest(Connection c) {}
         /** @hide */
         public void onPhoneAccountChanged(Connection c, PhoneAccountHandle pHandle) {}
-        public void onCdmaConnectionTimeReset(Connection c) {}
     }
 
     /**
@@ -894,6 +878,8 @@ public abstract class Connection extends Conferenceable {
         private final OutputStreamWriter mPipeToInCall;
         private final ParcelFileDescriptor mFdFromInCall;
         private final ParcelFileDescriptor mFdToInCall;
+
+        private final FileInputStream mFromInCallFileInputStream;
         private char[] mReadBuffer = new char[READ_BUFFER_SIZE];
 
         /**
@@ -902,8 +888,11 @@ public abstract class Connection extends Conferenceable {
         public RttTextStream(ParcelFileDescriptor toInCall, ParcelFileDescriptor fromInCall) {
             mFdFromInCall = fromInCall;
             mFdToInCall = toInCall;
+            mFromInCallFileInputStream = new FileInputStream(fromInCall.getFileDescriptor());
+
+            // Wrap the FileInputStream in a Channel so that it's interruptible.
             mPipeFromInCall = new InputStreamReader(
-                    new FileInputStream(fromInCall.getFileDescriptor()));
+                    Channels.newInputStream(Channels.newChannel(mFromInCallFileInputStream)));
             mPipeToInCall = new OutputStreamWriter(
                     new FileOutputStream(toInCall.getFileDescriptor()));
         }
@@ -951,7 +940,7 @@ public abstract class Connection extends Conferenceable {
          * not entered any new text yet.
          */
         public String readImmediately() throws IOException {
-            if (mPipeFromInCall.ready()) {
+            if (mFromInCallFileInputStream.available() > 0) {
                 return read();
             } else {
                 return null;
@@ -2404,16 +2393,6 @@ public abstract class Connection extends Conferenceable {
             }
         }
         fireOnConferenceableConnectionsChanged();
-    }
-
-    /**
-       *@hide
-       * Resets the cdma connection time.
-       */
-    public final void resetCdmaConnectionTime() {
-        for (Listener l : mListeners) {
-            l.onCdmaConnectionTimeReset(this);
-        }
     }
 
     /**
